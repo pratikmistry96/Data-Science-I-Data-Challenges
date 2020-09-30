@@ -1,0 +1,236 @@
+---
+title: "Data Challenge 1"
+author: "Pratik Mistry"
+date: "30 September 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+For this data challenge, we were tasked with using tidytuesday data on dairy cows to make five original paper quality figures.
+
+All the figures had to adhere to the following requirements:
+
+- Use at least five distinct plot types (i.e. histogram, scatterplot, barplot, stacked barplot, …)
+- At least two figures should use a change of color from the default ggplot2 colors
+- At least one figure should use a ‘join’ statement to join two of the dataframes together (or an external dataframe that you bring into the analysis)
+- All plots should have a title
+- Variable names are not acceptable for axis labels and legend labels
+- Figure captions should be three to five sentences and describe the figure and trends in the data.
+
+
+# Load Libraries
+```{r, message = FALSE}
+## The chunk suppresses 
+## Clear the variables in the workspace to prevent any issue
+remove(list = ls()) 
+
+## Load the necessary libraries for the assignment
+library(tidyr) ## Used for the gather function
+library(dplyr) ## Used to Tidy Data
+library(ggplot2) ## Contains plotting functions
+library(RColorBrewer) ## New color palette
+library(wesanderson) ## Wes Anderson color palette
+```
+
+# Import Data
+```{r}
+## Use the read.csv function to import the following datasets
+
+milkcow_facts <- read.csv("milkcow_facts.csv")
+clean_cheese <- read.csv("clean_cheese.csv")
+fluid_milk_sales <- read.csv("fluid_milk_sales.csv")
+milk_product_facts <- read.csv("milk_products_facts.csv")
+state_milk_prod <- read.csv("state_milk_production.csv")
+```
+
+
+# 1) Cheese Consumption
+
+```{r}
+## Rename the columns with total cheese consumption to remove periods and 
+## replace with an underscore
+
+## And store new the new data in a variable called clean_cheese_summary
+clean_cheese_summary <- clean_cheese %>%
+  rename(American_Cheese = Total.American.Chese,
+         Italian_Cheese = Total.Italian.Cheese,
+         Natural_Cheese = Total.Natural.Cheese,
+         Processed_Cheese = Total.Processed.Cheese.Products)
+```
+
+
+```{r}
+## Change the data set to create a new column called cheese_type, which will 
+## include the variable names: American_Cheese, Italian_Cheese, Natural_Cheese,
+## and Processed_Cheese, and it also creates a column consumption, which 
+## includes consumption/person for each cheese_type
+
+
+clean_cheese_summary <- clean_cheese_summary %>%
+  gather(cheese_type, consumption, American_Cheese,
+         Italian_Cheese, Natural_Cheese, Processed_Cheese) %>%
+  select(Year, cheese_type, consumption) ## Select only the columns of interest
+```
+
+```{r}
+## Rename all the values in the cheese_type column to remove the underscore
+## Do this to create better values for plotting
+clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "American_Cheese"] = "American Cheese"
+clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "Italian_Cheese"] = "Italian Cheese"
+clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "Natural_Cheese"] = "Natural Cheese"
+clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "Processed_Cheese"] = "Processed Cheese"
+
+```
+
+
+
+```{r}
+## Use the clean_cheese_summary data frame to create a box plot that compares
+## cheese consumption between different cheese types over a time period
+clean_cheese_summary %>%
+  ## Use the ggplot function to make the x axis cheese type and the 
+  ## y variable consumption
+  ggplot(aes(x = cheese_type, y = consumption)) + 
+  ## Create a boxplot and color it based on cheese type
+  geom_boxplot(aes(fill = cheese_type)) +
+  ## Use sprintf to find the minimum and maximum year and include it into the 
+  ## title
+  labs(title = sprintf("Cheese Consumption: %d - %d",
+                       min(clean_cheese_summary$Year), 
+                       max(clean_cheese_summary$Year)),
+       x = "Cheese Type", ## Set the x axis label
+       y = "Consumption (lbs/person)", ## Set the y axis label
+       fill = "Cheese Type") + ## Label the legend
+  ## Use scale_fill_manual to change the color palette for the plot
+  ## to the fantastic fox palette from the wes_anderson library
+  scale_fill_manual(values = (wes_palette(n = 4, name = "FantasticFox1")))
+```
+
+**Figure 1:** This figure shows us the variation in the total consumption of American Cheese, Italian Cheese, Natural Cheese, and Processed Cheese from 1970 to 2017. From the figure, we can infer that the consumption Italian Cheese and Natural Cheese, compared to American Cheese and Processed Cheese, varied greatly over the 47 year period. Additionally, the figure shows that median cheese consumption, over the 47-year period, was much higher for Natural Cheese followed by American Cheeses, then Italian Cheeses, and the last is Processed Cheese.
+
+
+# 2) Milk Production per Cow
+
+```{r}
+## Use the milkcow facts data frame to create a scatter plot comparing milk 
+## production to milk per cow
+milkcow_facts %>%
+  ## Use ggplot to set the x and y values
+  ggplot(aes(x = milk_production_lbs, y = milk_per_cow)) +
+  ## Create a scatter plot and make the size according to the average
+  ## number of milk cows
+  geom_point(aes(size  = avg_milk_cow_number), color = "red") +
+  labs(title = sprintf("Milk Production vs Milk Per Cow: %d - %d",
+                       min(milkcow_facts$year),
+                       max(milkcow_facts$year)),
+       x = "Milk Production (lbs)",
+       y = "Milk / Cow (lbs)",
+       size = "Average Milk Cow Number")
+```
+
+**Figure 2:** This plot examines the production of milk and the amount of milk produced per cow across the time period between 1980 and 2014, each data point corresponds to a year. This graph shows us that as milk production goes up the amount of milk produced by a cow also goes up. Additionally, the size of the data points corresponds to the average number of milk cows in that year. Interestingly, On years that overall milk production was low and the amount of milk per cow is low, the average number of milk cows is greater. This can indicate that in order to maintain a certain magnitude of milk production the number of cows increased when there was less milk per cow.
+
+
+# 3) Fluid Milk Sales
+
+```{r}
+## Create a graph that compares the change in milk type production as a 
+## percentage of total production
+
+## Create a new data frame called total_prod that contains the total production
+## of milk per year
+total_prod <- fluid_milk_sales %>%
+  filter(milk_type == "Total Production") %>% ## Only select total production 
+  ## of milk per year
+  select(year, pounds) %>% ## Only select the the year and pounds column
+  rename(total_pounds = pounds) ## Rename pounds to total_pounds
+
+fluid_milk_sales %>%
+  filter(milk_type != "Total Production") %>% ## Remove the rows with Total
+  ## Production
+  inner_join(total_prod) %>% ## Add the previous data frame to this data frame
+  ## Calculate the percentage of total pounds for each cheese type and 
+  ## add it to the data frame as ratio
+  mutate(ratio = 100*(pounds / total_pounds)) %>%
+  ggplot(aes(x = year, y = ratio)) + ## Set the x axis to year and the y axis
+  ## to ratio
+  ## Create a bar graph that is colored by milk type and is a stacked plot
+  ## so all percentages add to one
+  geom_bar(aes(fill = milk_type), stat = "identity", position = "stack") +
+  labs(title = sprintf("Percent Milk Type Production: %d - %d",
+                       min(fluid_milk_sales$year),
+                       max(fluid_milk_sales$year)),
+       y = "Percent Total Production",
+       x = "Year",
+       fill = "Milk Type") +
+  ## Change the color palette using R brewer for the plot
+  scale_fill_brewer(palette = "Spectral")
+```
+
+**Figure 3:** This figure shows the change in the milk type production as a percentage of total milk production from the time period 1975 - 2017. From this figure, we see that over the 42-year period the whole milk production percentage of total production decreased over time while most milk types saw a growth, such as reduced fat, skim milk, low fat, and flavored (not whole).
+
+
+# 4) Production of Milk by Region
+
+```{r}
+## Create a figure to observe total milk production by region from 1970 to 2017
+
+state_milk_prod %>%
+  group_by(region, year) %>% ## Group the data frame by year and region
+  ## Use the summarise function to create a new variable called total_prod
+  ## that sums the milk production for each year and within each year, each
+  ## region
+  summarise(total_prod = sum(milk_produced)) %>%
+  ggplot(aes(x = year, y = total_prod)) + ## Assign year to x axis and total
+  ## production to y variable
+  geom_line(aes(color = region), lwd = 1) + ## color the lines by year
+  labs(x = "Year", y = "Total Milk Production (lbs)",
+       title = sprintf("Total Milk Production by Region: %d - %d",
+                       min(state_milk_prod$year),max(state_milk_prod$year)),
+       color = "Region")
+```
+
+**Figure 4:** This figure compares milk production by region from 1970 - 2017. It showed that only three regions showed significant increases, Pacific, Lake Shores, and Mountain. All the other traces remained relatively the same, except for the Southern Plains and the Delta states, which saw a decrease in milk production over the 47-year period.
+
+
+
+# 5) Price Paid for Milk by Region
+
+```{r, message = FALSE}
+## Create a figure that compares price paid for milk by region
+
+## Create a new data table that contains total price paid for each region
+milk_all <- state_milk_prod %>%
+  group_by(region, year) %>% ## Group the data by region and year
+  ## Use the summarise function to get regional totals of milk production
+  summarize(region_total_milk = sum(milk_produced)) %>%
+  ## use inner join to add the milkcow facts data frame, which includes
+  ## the avg price paid for milk for each year
+  inner_join(x = milkcow_facts) %>%
+  ## Add a variable that multiples average price paid for milk with regional 
+  ## totals of milk production
+  mutate(region_cost = avg_price_milk * region_total_milk)
+```
+```{r}
+## Display the data by using a histogram
+milk_all %>%
+  ggplot(aes(x = region_cost)) + ## Set the x axis to be regional cost
+  ## Fill the histogram by region and change the opacity
+  geom_density(aes(fill = region), alpha = 0.3, position = "identity") +
+  scale_x_log10() + ## Scale the x axis to be log distributed because the
+  ## data was skewed to the right
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ## Adjust the text
+  ## to avoid overlapping values on the x-axis 
+  labs(title = sprintf("Distribution of Price Paid for Milk by Region: %d - %d",
+                       min(milk_all$year),max(milk_all$year)),
+       x = "Price Paid for Milk (Dollars)", y = "Density",
+       fill = "Region") +
+  facet_wrap(~region) ## Use facet_wrap to create separate plots based on region
+```
+
+**Figure 5:** This figure compares the distribution of prices paid for milk across regions between 1980 to 2014. Overall, there seems to be some price variation in milk prices between regions; however, the Appalachian, Southeast, and Northern Plains regions have similar price distributions across the time-period. It is noticeable that the Pacific and Lake State regions had the highest prices for during the 34-year period, while the Delta States had overall lower prices. Finally, some regions have bimodal distributions(Corn Belt, Lake States, Northeast, and Northern Plains), with smaller peaks towards higher prices, which suggests a large gap in prices during the time-period.
