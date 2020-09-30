@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+**Repository Link:** https://github.com/pratikmistry96/Data-Science-I-Data-Challenges/tree/master/Data_Challenge_1
+
 # Introduction
 
 For this data challenge, we were tasked with using tidytuesday data on dairy cows to make five original paper quality figures.
@@ -21,6 +23,8 @@ All the figures had to adhere to the following requirements:
 - All plots should have a title
 - Variable names are not acceptable for axis labels and legend labels
 - Figure captions should be three to five sentences and describe the figure and trends in the data.
+
+
 
 
 # Load Libraries
