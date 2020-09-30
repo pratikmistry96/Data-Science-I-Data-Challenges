@@ -1,4 +1,14 @@
-This readme file and all datasets in this repository were taken from a Tidytuesday repository with link below.
+# Introduction
+
+This repository contains a code and knitted HTML file for a Data Challenge
+
+- 200930_Mistry_DataChallenge_1.Rmd
+- 200930_Mistry_DataChallenge_1.html
+
+The data challenge required us to utilize data provided by Tidytuesday and create five figures.
+
+
+**Note:** This readme file and all datasets in this repository were taken from a Tidytuesday repository with link below.
 
 Tidytuesday Repo: https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-01-29
 
