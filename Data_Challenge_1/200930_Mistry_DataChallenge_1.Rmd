@@ -168,7 +168,7 @@ fluid_milk_sales %>%
   ## Create a bar graph that is colored by milk type and is a stacked plot
   ## so all percentages add to one
   geom_bar(aes(fill = milk_type), stat = "identity", position = "stack") +
-  labs(title = sprintf("Percent Milk Type Production: %d - %d",
+  labs(title = sprintf("Total Production by Milk Type: %d - %d",
                        min(fluid_milk_sales$year),
                        max(fluid_milk_sales$year)),
        y = "Percent Total Production",
