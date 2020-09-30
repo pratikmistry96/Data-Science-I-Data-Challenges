@@ -387,7 +387,9 @@ summary {
 <div id="load-libraries" class="section level1">
 <h1>Load Libraries</h1>
 <pre class="r"><code>## The chunk suppresses 
-## Clear the variables in the workspace to prevent any issue
+## Clear the variables in the workspace to prevent any issues with any
+## previously loaded variables
+
 remove(list = ls()) 
 
 ## Load the necessary libraries for the assignment
@@ -429,7 +431,7 @@ clean_cheese_summary &lt;- clean_cheese_summary %&gt;%
          Italian_Cheese, Natural_Cheese, Processed_Cheese) %&gt;%
   select(Year, cheese_type, consumption) ## Select only the columns of interest</code></pre>
 <pre class="r"><code>## Rename all the values in the cheese_type column to remove the underscore
-## Do this to create better values for plotting
+## So the cheese types display without the underscore in the legend
 clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == &quot;American_Cheese&quot;] = &quot;American Cheese&quot;
 clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == &quot;Italian_Cheese&quot;] = &quot;Italian Cheese&quot;
 clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == &quot;Natural_Cheese&quot;] = &quot;Natural Cheese&quot;

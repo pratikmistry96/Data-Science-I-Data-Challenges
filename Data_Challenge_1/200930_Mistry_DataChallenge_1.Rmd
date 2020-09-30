@@ -30,7 +30,9 @@ All the figures had to adhere to the following requirements:
 # Load Libraries
 ```{r, message = FALSE}
 ## The chunk suppresses 
-## Clear the variables in the workspace to prevent any issue
+## Clear the variables in the workspace to prevent any issues with any
+## previously loaded variables
+
 remove(list = ls()) 
 
 ## Load the necessary libraries for the assignment
@@ -83,7 +85,7 @@ clean_cheese_summary <- clean_cheese_summary %>%
 
 ```{r}
 ## Rename all the values in the cheese_type column to remove the underscore
-## Do this to create better values for plotting
+## So the cheese types display without the underscore in the legend
 clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "American_Cheese"] = "American Cheese"
 clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "Italian_Cheese"] = "Italian Cheese"
 clean_cheese_summary$cheese_type[clean_cheese_summary$cheese_type == "Natural_Cheese"] = "Natural Cheese"
