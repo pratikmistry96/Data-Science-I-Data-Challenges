@@ -42,9 +42,10 @@ shinyUI(navbarPage(
         polling percentages of the candidates from February to October to see how their favorability flucuated over
         the past couple of months. A few things to note, the national polls have remained in favor in Biden with
         a slowly increasing gap, but this plot allows you to see how state polls have changed over time. The other tabs
-        visualize the electoral map of continental US with results from the most recent poll on October 7, 2020. And
+        visualize the electoral map of continental US with results from the most recent poll on October 14th, 2020. And
         the last tab allows you to see how polls compared with historical polls (from the same day) of their
-        respective year."
+        respective year. However, it's important to realize there are 20 days till the election from October 14th,
+        so anything can happen"
       ),
       p("This interface allows you to select the region and restrict the months between February and March, inclusive,
         to observe polling trends."),
@@ -79,32 +80,36 @@ shinyUI(navbarPage(
         step = 1
       )
     ),
-    mainPanel(plotlyOutput("trendPlot", height = 600)) # Plot the data and set the height
+    mainPanel(plotlyOutput("trendPlot", height = 600),# Plot the data and set the height
+              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page. 
+                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls")) 
   ),
   tabPanel(
-    # Create a tab panel of the election map if the election happened on October 7th 2020
+    # Create a tab panel of the election map if the election happened on October 14th 2020
     "2020 Election Map",
     sidebarPanel(
       h4("Electoral Results of Continental USA"),
       # Set the header
-      # Add a paragraph describing the graph and electoral results if the election were to happen on October 7 2020
+      # Add a paragraph describing the graph and electoral results if the election were to happen on October 14th, 2020
       p(
-        "Based on polling results from October 7, 2020, this maps shows who will win the state and the associated number
-        of electoral votes of only the continental USA. As of October 7th and according to election results from the 
+        "Based on polling results from October 14th, 2020, this maps shows who will win the state and the associated number
+        of electoral votes of only the continental USA. As of October 14th and according to election results from the 
         continental US, it seems that Biden will win the election by a landslide; however, the results may differ on 
         election day depending on the actual number of people who vote, and the results of undecided voters."
       )
     ),
-    mainPanel(plotlyOutput("map", height = "auto")) # Set the plot
+    mainPanel(plotlyOutput("map", height = "auto"),# Plot the data and set the height
+              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page. 
+                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls")) # Set the plot
   ),
   tabPanel(
-    # Create a tab panel of historical election comparisons on October 7 across all years
+    # Create a tab panel of historical election comparisons on October 1th across all years
     "Historical Poll Comparisons",
     sidebarPanel(
       h4("Historical Comparison of Polling Percentages"),
       p(
         "With this graph, you can compare polling percentages of candidates from historical elections between 1968 to
-        2016 with 2020. The polling percentages of all of these models were dated on October 7th of their respective years.
+        2016 with 2020. The polling percentages of all of these models were dated on October 14th of their respective years.
         You can use this chart to infer results, but recently, we've seen that polls are not definite measures of election
         results."
       ),
@@ -116,6 +121,8 @@ shinyUI(navbarPage(
         selected = 2016
       )
     ),
-    mainPanel(plotlyOutput("compPlot", height = 800))
+    mainPanel(plotlyOutput("compPlot", height = 800),# Plot the data and set the height
+              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page. 
+                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls"))
   )
 ))

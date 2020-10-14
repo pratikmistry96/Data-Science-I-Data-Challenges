@@ -67,9 +67,9 @@ historical_polls <-
          candidate_name, # Select candidate name
          pct_trend_adjusted) %>% # Adjusted polling percent
   mutate(modeldate = as.Date(modeldate, format = "%m/%d/%Y")) %>% ## Turn string date into date object
-  filter(months(modeldate) == "October",  # Filter to specific poll date of October 7th to match most recent data from 
+  filter(months(modeldate) == "October",  # Filter to specific poll date of October 14th to match most recent data from 
                                           # fivethirtyeight 
-         day(modeldate) == 7,
+         day(modeldate) == 14,
          state == "National") # Filter data to include only national polls
 
 
@@ -97,12 +97,12 @@ electoral_college <-
 ####################
 
 
-# Extract polling values from October 7, 2020 from all continental US states, excluding National polls, Alaska, 
+# Extract polling values from October 14, 2020 from all continental US states, excluding National polls, Alaska, 
 # and Hawaii
 
 polls_2020_states <- polls_2020 %>%
-  filter(months(modeldate) == "October", # Filter data to be polls from October 7
-         day(modeldate) == 7,
+  filter(months(modeldate) == "October", # Filter data to be polls from October 14
+         day(modeldate) == 14,
          state != "National") %>% # Filter data to remove national polls
   # Use an if_else statement to add political affiliations, if Biden = Democratic ; if Trump = Republican
   mutate(party = if_else( # Use mutate to update data frame
@@ -116,8 +116,8 @@ polls_1968_2020 <-
   historical_polls %>%
   rbind(polls_2020 %>% # Use rbind to add the new row of values after manipulating data from the polls_2020 data frame
           filter(
-            months(modeldate) == "October", # Filter to October 7th
-            day(modeldate) == 7,
+            months(modeldate) == "October", # Filter to October 14th
+            day(modeldate) == 14,
             state == "National" # Filter only National polls
           )) %>%
   arrange(cycle) %>% # Arrange the data frame by election year from 1968 to 2020
@@ -219,7 +219,7 @@ rm(
 ## Write CSVs for Shiny App ##
 ##############################
 
+write.csv(electoral_results, "election_2020/electoral_results.csv")
 write.csv(election_map, "election_2020/election_map.csv")
 write.csv(polls_1968_2020, "election_2020/polls_1968_2020.csv")
 write.csv(polls_2020, "election_2020/polls_2020.csv")
-write.csv(electoral_results, "election_2020/electoral_results.csv")

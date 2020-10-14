@@ -85,7 +85,7 @@ election_comp <- function(data, year) {
         xlab("Election Cycle") + ## Set x-label
         ylab("Polling %") + ## Set y label
         ylim(0, 100) + ## Set y limits
-        labs(fill = "Political Affliation:") + ## Set fill title
+        labs(fill = "Political Party:") + ## Set fill title
         theme(
             panel.grid = element_blank(), ## Turn off the grid
             plot.background = element_rect(fill = "gray92"), # Blend background to plot background
@@ -143,7 +143,7 @@ trends <- function(data, region, start, end) {
 }
 
 # Create a function to create an election map of continental US color coded by who poll percentages from 
-# October 7th 2020
+# October 14th 2020
 plot_state_results <- function(data) {
     election_map_plot <- ggplot(data,
                                 aes(x = long, # Plot longitude on x axis
@@ -171,7 +171,7 @@ plot_state_results <- function(data) {
         # Create the title and add the total electoral votes in the title
         ggtitle(
             paste0(
-                "Continental US Results - October 7th\n",
+                "Continental US Results - October 14th\n",
                 "Results: Joseph R. Biden Jr. - ",
                 electoral_results %>%
                     filter(winner == "Joseph R. Biden Jr.") %>%
@@ -204,7 +204,7 @@ plot_state_results <- function(data) {
 polls_1968_2020 <- read.csv("polls_1968_2020.csv")
 polls_2020 <- read.csv("polls_2020.csv")
 election_map <- read.csv("election_map.csv")
-electoral_results <- read.csv("electoral_votes.csv")
+electoral_results <- read.csv("electoral_results.csv")
 
 
 #########################

@@ -16,3 +16,7 @@ A folder containing CSVs from fivethirty eight for data analysis.
 
 **Shiny App Link:** https://pratikmistry96.shinyapps.io/election_2020/
 
+
+**Date Link:** https://github.com/fivethirtyeight/data/tree/master/polls
+
+Description: This web app allows you to visualize 2020 poll trends between Joe Biden and Donald Trump. It also allows you to compare the polling as of October 14th with historical polls of previous election years on the same day.
