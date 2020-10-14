@@ -1,0 +1,19 @@
+---
+title: "Data Challenge 2"
+author: "Pratik Mistry"
+date: "10/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**GitHub Link:** 
+
+The GitHub Repo contains an rscript for data wrangling: election_2020_datawrangling.R
+A folder containing CSVs from fivethirty eight for data analysis.
+
+**Shiny App Link:**
+
+Goal: I wanted to 
