@@ -9,11 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-**GitHub Link:** 
+**GitHub Link:** https://github.com/pratikmistry96/Data-Science-I-Data-Challenges/tree/master/Data_Challenge_2
 
 The GitHub Repo contains an rscript for data wrangling: election_2020_datawrangling.R
 A folder containing CSVs from fivethirty eight for data analysis.
 
-**Shiny App Link:**
+**Shiny App Link:** https://pratikmistry96.shinyapps.io/election_2020/
 
-Goal: I wanted to 
