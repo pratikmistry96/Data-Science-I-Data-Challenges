@@ -38,14 +38,16 @@ shinyUI(navbarPage(
       h4("Comparing 2020 Poll Trends by Region"),# Create an HTML heading
       # Create a paragraph describing the plot
       p(
-        "Joe Biden became the unofficial nominee of the Democratic party around February. In this tab, you can compare
+        "Joe Biden became the unofficial presidential nominee of the Democratic party around February. In this tab, you can compare
         polling percentages of the candidates from February to October to see how their favorability flucuated over
-        the past couple of months. A few things to note, the national polls have remained in favor in Biden with
+        the past couple of months. Within this tab, you can visualize trends in polling percentage from February to 
+        October 14th, 2020. Within this tab, you can select the region/state and restrict the polls within a range
+        of months. A few things to note, the national polls have remained in favor in Biden with
         a slowly increasing gap, but this plot allows you to see how state polls have changed over time. The other tabs
         visualize the electoral map of continental US with results from the most recent poll on October 14th, 2020. And
-        the last tab allows you to see how polls compared with historical polls (from the same day) of their
+        the last tab allows you to see how the 2020 poll compared with historical polls (from the same day) of their
         respective year. However, it's important to realize there are 20 days till the election from October 14th,
-        so anything can happen"
+        so anything can happen. This app allows you to visualize trends of polling."
       ),
       p("This interface allows you to select the region and restrict the months between February and March, inclusive,
         to observe polling trends."),
@@ -81,8 +83,10 @@ shinyUI(navbarPage(
       )
     ),
     mainPanel(plotlyOutput("trendPlot", height = 600),# Plot the data and set the height
-              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page. 
-                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls")) 
+              p("All data used in this visualization was pulled from the FiveThirtyEight GitHub page 
+                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls"),
+              p("FiveThirtyEight provides data for 2020 polling, as well as, results from historical polls
+                from 1968 to 2020")) 
   ),
   tabPanel(
     # Create a tab panel of the election map if the election happened on October 14th 2020
@@ -99,8 +103,10 @@ shinyUI(navbarPage(
       )
     ),
     mainPanel(plotlyOutput("map", height = "auto"),# Plot the data and set the height
-              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page. 
-                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls")) # Set the plot
+              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page 
+                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls"),
+              p("FiveThirtyEight provides data for 2020 polling, as well as, results from historical polls
+                from 1968 to 2020"))
   ),
   tabPanel(
     # Create a tab panel of historical election comparisons on October 1th across all years
@@ -122,7 +128,9 @@ shinyUI(navbarPage(
       )
     ),
     mainPanel(plotlyOutput("compPlot", height = 800),# Plot the data and set the height
-              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page. 
-                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls"))
+              p("\n\nAll data used in this visualization was pulled from the FiveThirtyEight GitHub page 
+                for election poll results https://github.com/fivethirtyeight/data/tree/master/polls"),
+              p("FiveThirtyEight provides data for 2020 polling, as well as, results from historical polls
+                from 1968 to 2020"))
   )
 ))

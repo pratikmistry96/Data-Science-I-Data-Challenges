@@ -120,7 +120,7 @@ trends <- function(data, region, start, end) {
                     "\nPoll Date: ",
                     modeldate, # Add poll date / model date
                     "\nPoll Percentage: ",
-                    pct_trend_adjusted # All poll percentage
+                    round(pct_trend_adjusted, 1), "%" # All poll percentage
                 )
             )
         ) +
