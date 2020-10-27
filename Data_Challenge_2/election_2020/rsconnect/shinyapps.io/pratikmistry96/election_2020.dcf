@@ -5,8 +5,8 @@ account: pratikmistry96
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3007267
-bundleId: 3740463
+bundleId: 3741510
 url: https://pratikmistry96.shinyapps.io/election_2020/
-when: 1602692428.89942
+when: 1602705935.47763
 asMultiple: FALSE
 asStatic: FALSE

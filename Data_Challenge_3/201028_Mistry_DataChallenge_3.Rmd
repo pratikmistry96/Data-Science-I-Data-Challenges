@@ -1,0 +1,209 @@
+---
+title: "Data Challenge 3"
+author: "Pratik Mistry"
+date: "10/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Libraries
+
+Load the libraries necessary to perform the following functions and data analysis
+
+```{r, message = FALSE}
+## Load Libraries
+rm(list = ls()) ## Remove current data from environment
+library(ggplot2)
+library(dplyr)
+library(purrr) ## Load purrr for map statements
+library(readr)
+library(knitr) ## Load knitr for producing markdown tables using r code
+library(forcats) ## This library has a function to rename NA factors
+library(plotly) 
+library(stringr) ## Use stringr to adjust plot labels
+library(kableExtra) ## Use kableExtra to better style tables produce from knitr
+```
+
+
+# Load and Wrangle Data for the Data Challenge
+
+In this section, I'll load and wrangle the coffee ratings from the tidytuesday GitHub repository. This code will adjust the data frame to bin the mean altitudes, rename NA values to "missing", and renames "Cote d?Ivoire" to "Cote d'Ivoire"
+
+## Load Data
+```{r, message = FALSE}
+
+## Store data from the coffee ratings csv into a data frame titled coffee_ratings
+coffee_ratings <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+
+```
+
+## Data Wrangling
+```{r}
+## The following code will put the mean altitudes into different bins for easier group, and it will change the NA
+## factor to "Missing". Additionally, it will rename Cote divoire to have an apostrophe instead of a question mark.
+coffee_ratings <- coffee_ratings %>%
+  mutate(binned_mean_altitude = cut(altitude_mean_meters, # Use cut to bin mean altitude
+                                    c(0,
+                                      1000,
+                                      2000,
+                                      3000,
+                                      4000,
+                                      5000,
+                                      Inf),
+                                    labels = c( ## Add labels to the bins that contain the intervals
+                                      "0 - 1000m",
+                                      "1001m - 2000m",
+                                      "2001m - 3000m",
+                                      "3001m - 4000m",
+                                      "4001m - 5000m",
+                                      "5001m +"
+                                    )),
+         # Change the NA factor in the binned altitudes to Missing
+         binned_mean_altitude = fct_explicit_na(binned_mean_altitude, na_level = "Missing"),
+         # Rename all NA countries of origin to Missing
+         country_of_origin = if_else(is.na(country_of_origin),
+                                     "Missing",
+                                     country_of_origin),
+         ## Rename the replace the question mark with an apostrophe in Cote d'Ivoire
+         country_of_origin = if_else(country_of_origin == "Cote d?Ivoire",
+                                     "Cote d'Ivoire",
+                                     country_of_origin))
+```
+
+
+# Question 1: Write a function that returns a table with the mean and standard deviation of the aroma through moisture columns of the coffee ratings data for different categories of coffee. Produce the table for (a) species, (b) country of origin, and (c) binned mean altitude in meters.
+
+## Functions:
+
+**Function 1:** This function will extract the mean and standard deviation from a vector and store those values into a string and returns it in the format *mean*(*sd*). Additionally, if the standard deviation is NA because there is only one value in the vector, it replaces the value with a " . "
+```{r}
+## Name the function get_mu_sd with an input of x
+get_mu_sd <- function(x){
+  x.mu <- round(mean(x), 2) ## Store the mean in a variable called x.mu
+  x.sd <- round(sd(x), 2) ## Store the standard deviation in a variable called x.sd
+  ## Use the ifelse statement to check if sd is NA and replace it if it is
+  x.sd <- ifelse(is.na(x.sd),
+                  ".",
+                  x.sd)
+  return(paste0(x.mu,"(",x.sd,")")) # Use paste0 to return a string containing mean and standard deviation
+}
+```
+
+**Function 2:** This function will be used to take the coffee table data-frame and produce tables that will produce the mean and standard deviation for columns aroma through moisture grouped by a variable input
+```{r}
+## Name the function mk_coffee_tbl with a data frame input and a variable called grp, which contains a string that 
+## contains the name of the columns that will be used to group the data frame to produce a table of means and 
+## standard deviation
+mk_coffee_tbl <- function(data, grp){
+  tbl <- data %>%
+    select(grp, aroma:moisture) %>% ## Select all necessary columns
+    group_by(eval(sym(grp))) %>% ## Since the variable grp is a string, we need to use eval(sym()) in order to 
+    ## to successfully group the data frame by a column
+    summarise_at(vars(aroma:moisture), get_mu_sd) ## Use summarise_at to summarise over a range of variables
+  ## and apply the function get_mu_sd over all columns
+  names(tbl)[1] <- grp ## Extract the names of the columns to rename in the next step
+  ## Use str_to_title to title column names and use gsub to replace the underscores with spaces
+  kbl_tbl <- kable(tbl, 
+                   col.names = str_to_title(gsub("_",  
+                                                 " ", 
+                                                 colnames(tbl)))) %>%
+    kable_styling()
+  return(kbl_tbl)
+}
+```
+
+## Produce Coffee Tables
+The following code will produce tables that produce means and standard deviations for the values of Aroma through Moisture grouped by species, country of origin, and binned mean altitudes
+```{r, message = FALSE}
+## Create a list of strings for the column names "species", "country_of_origin", and "binned_mean_altitude"
+## This list will be used with a map function to produce 3 tables without a loop
+grp <- list("species",
+         "country_of_origin",
+         "binned_mean_altitude")
+
+## Run the map function over a list using a the mk_coffee_tbl function with a data = coffee_ratings as the constant 
+## input argument
+q1 <- map(grp, mk_coffee_tbl, data = coffee_ratings)
+
+```
+
+
+```{r}
+q1[[1]] ## Display the first table in the list
+```
+**Table 1:** This table contains the mean and standard deviation of two coffee species, Arabica and Robusta, across the ratings from Aroma to Moisture
+
+```{r}
+q1[[2]] 
+```
+**Table 2:** This table contains the mean and standard deviation of various countries of origin across the ratings from Aroma to Moisture. Any countries of origin that were not listed are grouped into a "Missing" group
+
+
+```{r}
+q1[[3]]
+```
+**Table 3:** This table contains the mean and standard deviation of various of binned mean altitudes across the ratings from Aroma to Moisture. Any missing mean altitude was grouped into a category called "Missing"
+
+# Question 2: Write a function that makes a scatterplot of any two variables from the columns aroma:moisture and colors by a particular grouping. Make the plot for (1) aroma versus flavor colored by species and (2) balance versus body colored by binned mean altitude. (Hint: Remove outliers to make a more compelling plot!)
+
+
+## Functions: 
+
+**Function 3:** This function will be used to input a data frame and take three plot variables. It will be used to produce scatter plots from the coffee ratings data from the columns aroma throught moisture, and color by a group variable. 
+```{r}
+## Name the function plt_coffee with the arguments: data frame of coffee data, the name of the x column to plot (as
+## a string), the name of the y column to plot (as a string), and a group to color (as a string)
+plt_coffee <- function(data, col.x, col.y, grp){
+  x <- data %>%
+    filter(eval(sym(col.x)) != 0, ## Remove any zeros values from x column
+           !is.na(eval(sym(col.x))), ## Remove any NAs from the x column
+           eval(sym(col.y)) != 0, ## Remove any zeros from the y column
+           !is.na(eval(sym(col.y))),) %>% ## Remove any NAs from the y column
+    ggplot(aes_string(x = col.x, ## Use aes_string to plot the data using the string inputs
+                      y = col.y)) +
+    geom_jitter(aes_string(col = grp), ## Use gitter to createa  scatter plot and color by group
+               size = 2,
+               alpha= 0.7) +
+    labs(title = paste("Coffee Ratings: ", ## Use paste to create a title for the plot using the string inputs
+                       str_to_title(col.x), 
+                       "vs.", 
+                       str_to_title(col.y)),
+         x = str_to_title(col.x), ## name the x axis
+         y = str_to_title(col.y), ## name the y axis
+         col = str_wrap(str_to_title(gsub("_", " ", grp)), 9)) ## Label the legend and replace underscore with space
+  return(x)
+}
+```
+
+## Produce Coffee Plots
+
+```{r}
+## Create a list of the options for the x axis data, y axis data, and the grouping
+plt.opt1 <- list("aroma",
+                 "balance")
+plt.opt2 <- list("flavor",
+                 "body")
+plt.opt3 <- list("species",
+                 "binned_mean_altitude")
+
+## Use pmap to create two plots with varying inputs for both, except the data frame
+q2 <- pmap(list(plt.opt1,
+          plt.opt2,
+          plt.opt3),
+          plt_coffee, 
+          data = coffee_ratings)
+```
+
+
+```{r}
+q2[[1]]
+```
+**Figure 1:** Scatter plot of Aroma vs Flavor color-coded by species
+
+```{r}
+q2[[2]]
+```
+**Figure 2:** Scatter plot of Balance vs Body color-coded by binned mean altitude
