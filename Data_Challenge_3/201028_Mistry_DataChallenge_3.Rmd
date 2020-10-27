@@ -9,6 +9,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+**GitHub Link:** https://github.com/pratikmistry96/Data-Science-I-Data-Challenges/tree/master/Data_Challenge_3
+
+
 # Load Libraries
 
 Load the libraries necessary to perform the following functions and data analysis
