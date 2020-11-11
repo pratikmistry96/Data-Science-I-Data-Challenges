@@ -1,0 +1,214 @@
+---
+title: "Data Challenge 4"
+author: "Pratik Mistry"
+date: "11/8/2020"
+output: 
+  html_document:
+    fig_height: 5
+    fig_width: 8
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**GitHub Link:** https://github.com/pratikmistry96/Data-Science-I-Data-Challenges/tree/master/Data_Challenge_4
+
+# Introduction: 
+
+**Assignment:** For Data Challenge #4 we will be using data on National Park visits on tidytuesday (https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-09-17). Please familiarize yourself with the data before you begin. You will be answering the following 3 questions:
+
+1. Make a figure that shows the trend in the raw number of park visitors over time for 3 parks: Crater Lake, Joshua Tree, and Zion. Do the same but for the number of visitors normalized by state population for the state that contains the park.
+
+2. There seems to be a decrease in visitors for both Crater Lake and Zion comparing 1942 to 1941 (less so for Joshua tree). Run a simulation for all three parks (like our restaurant letter grade simulation in class) where you assume the probability of visiting each of the parks in both years (1941 and 1942) are the same. Plot a distribution for the number of people who visited in 1942 from your simulations and compare it to the number of people who actually visited the park in 1942. Remember our rules about iteration! If you do something twice write a function. Use map and apply statements as well. (Hint: You may want to look at the park visits in 1000s -- i.e. divide by 1000 to ease the computational burden of your simulation) DON'T FORGET TO SET A SEED FOR REPRODUCIBILITY! 
+
+3. Summarize your findings from questions 1 and 2 in a paragraph.
+
+# Load Libraries:
+
+Clear the workspace of any variables and load the appropriate libraries for the analysis
+
+```{r, message = FALSE}
+rm(list = ls()) ## Remove any variables in workspace to avoid errors
+library(tidyverse) ## Load tidyverse library, which includes dplyr and ggplot2
+options(scipen = 999) ## Set this option to avoid scientific notation on y-axis
+```
+
+
+# Load Data:
+
+Load national park data from tidytuesday github repository
+
+```{r, message = FALSE}
+## Load national park data and store it into a variable: parks
+parks <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/national_parks.csv")
+
+## Load state population data and store it into a a variable: state_pop
+state_pop <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-09-17/state_pop.csv")
+```
+
+
+# Data Wrangling:
+
+The following prepares the data to complete the tasks presented in the data challenge to restrict the data to Joshua Tree, Crater Lake, and Zion
+
+```{r}
+parks <- parks %>%
+  filter(parkname %in% c("Joshua Tree", ## Filter the data to restrict it to 3 national parks
+                         "Crater Lake",
+                         "Zion"),
+         year != "Total") %>% ## Remove "Total" from the years
+  mutate(year = as.numeric(year)) %>% ## Convert year from characters to numeric
+  inner_join(state_pop,by = c("year","state")) %>% ## Add the state population by year and state
+  mutate(norm_visitors = visitors/pop) ## Normalize visitors by state population
+```
+
+
+# Create Functions:
+
+This section defines the functions that will be used in further analyzes
+
+**Function 1:** This function is created to plot the number of visitors over the years and color the data by park name. There is an input to specify is the function will plot visitors normalized by state population at that year
+
+```{r}
+plt_visitors <- function(data, normalize) { ## Create a function called "plt_visitors" with inputs data and logical
+                                            ## value for plot normalization
+  if(normalize){ ## Use an if statement to see if we're plotting the visitors normalized by population
+    plt_obj <- data %>% ## Store the plot object in a variable titled 'plt_obj'
+      ggplot(aes(x = year, ## Make the x-axis year
+                 y = norm_visitors, ## Make the y-axis the visitors normalized by population
+                 group = parkname)) + ## Group by park names
+      labs(
+        y = "Park Visitors Normalized by State Population" ## Add y-label
+      )
+  }else{ ## The else will create an object for non-normalized data
+    plt_obj <- data %>%
+      ggplot(aes(x = year,## x-axis is the year
+                 y = visitors, ## make the y-axis the raw number of visitors
+                 group = parkname)) +
+      labs(
+        y = "Park Visitors"
+      )
+  }
+  plt_obj <- plt_obj + ## Add common properties to the plot object
+    geom_line(aes(col = parkname), ## Color the lines by park name
+              lwd = 1) + ## Adjust line width
+    labs(
+      title = "Park Visitors Over the Years", ## Title the graph
+      x = "Year", ## Label the x axis
+      col = "Park Names" ## Title the legend
+    )
+  return(plt_obj) ## Return the plot
+}
+```
+
+
+**Function 2:** This function is created to simulate the number of visitors using observed values from two years. This function will be used to see how far the observed value of visitors deviated from the simulated values in the year 1942.
+
+```{r}
+## Create a function called 'sim_visitors' with inputs: data, park(name), and reps(repetition)
+sim_visitors <- function(data, park, reps){
+  data_sub <- data %>% ## Create a variable called data_sub to subset the data frame
+    filter(parkname == park) ## Filter the data by the input specified park name
+  visitors_1941 <- data_sub$visitors[data_sub$year == 1941] ## Extract the number of visitors from year 1941
+  visitors_1942 <- data_sub$visitors[data_sub$year == 1942] ## Extract the number of visitors from year 1942
+  total_visitors <- visitors_1941 + visitors_1942 ## Add the number of visitors from 1941 and 1942
+  ## Run a simulation and store it in a data frame using a probability of 0.5
+  visitors_sim <- data.frame(dist = rbinom(reps, 
+                                           total_visitors,
+                                           p = 0.5))
+  ## Plot the distribution of the simulation
+  visitors_sim %>%
+    ggplot(aes(dist)) + ## Use the above calculated simulation as the input
+    geom_histogram(binwidth = 10, ## Create a histogram with a bindwidth of 20
+                   fill = "blue") +
+    geom_vline(xintercept = visitors_1942, ## Add an x-intercept of the observed values of visitors in 1942
+               col = "red",
+               lwd = 1) +
+    annotate("text", ## use annotate to add an annotation for the observed number of visitors
+             x = visitors_1942 + 150,
+             y = 10,
+             label = "observed",
+             hjust = "left",
+             angle = 0) +
+    labs(
+      title = paste0("Simulated Distribution of Visitors in 1942", ## Add the title
+                     " - ", park),
+      x = "Number of Visitors - if p = 0.50", ## Add x label
+      y = "Count" ## Add the y label
+    )
+}
+```
+
+
+# Task 1: Trend Plot of Visitors
+
+**Plot 1:**
+
+```{r}
+plt_visitors(parks, FALSE) ## Plot visitor information over the years by park
+```
+**Figure 1:** A plot of raw number of visitors by year of three national parks: Crater Lake, Joshua Tree, and Zion. Notice that there is a dip in the number of visitors between 1935 and 1955
+
+
+**Plot 2:**
+
+```{r}
+plt_visitors(parks, TRUE) ## Plot normalized visitor information
+```
+**Figure 2:** A plot of number of visitors normalized by the state population by year of three national parks: Crater Lake, Joshua Tree, and Zion. If we divide by the states population, the dip in visitors is still there, which indicates that the dip is not due to a decrease in the state's population between 1935 and 1955.
+
+
+**Plot 3:**
+
+```{r}
+parks %>%
+  filter(year %in% 1935:1955) %>% ## Filter the data and restrict the years between 1935 and 1955
+  mutate(year = factor(year)) %>% ## Turn the year values into factors
+  plt_visitors(FALSE) + ## Use the plot function with the normalization = FALSE
+  theme(
+    axis.text.x = element_text(angle = 45, ## Adjust the text angle to 45
+                               hjust = 1) ## Align the text
+  )
+```
+**Figure 3:** Based on the previous two figures, I am creating a new plot to see which years the dip in visitors occurred.
+
+# Task 2: 
+
+```{r}
+set.seed(96) ## Set the seed to ensure randomization is always the same
+## Create a list of park names to use as input for map function
+park_names <- list("Joshua Tree",
+                "Crater Lake",
+                "Zion")
+## Use a map function to simulate visitors for all three parks
+visitor_simulation <- map(park_names, 
+                          sim_visitors, 
+                          data = parks, 
+                          reps = 1000) ## Iterate the data 1000 times
+```
+
+
+**Park Name:** Joshua Tree
+```{r}
+visitor_simulation[[1]] ## Plot the Joshua Tree distribution
+```
+**Figure 4:** Simulated distribution of visitors in 1942 with a red line indicating the actual observed value of visitors in 1942 for the national park - Joshua Tree. Notice that the difference between the two values in approximately 4000 people, which is not as high as compared to the other national parks.
+
+
+**Park Name:** Crater Lake
+```{r}
+visitor_simulation[[2]] ## Plot the crater Lake distribution
+```
+**Figure 5:** The simulated distribution of visitors in 1942, with a red line indicating the actual observed value of visitors for the national park - Crater Lake. Notice that the difference between the observed and simulated is around 80,000 people.
+
+**Park Name:** Zion
+```{r}
+visitor_simulation[[3]] ## plot the zion distribution
+```
+
+**Figure 6:** The simulated distribution of visitors in 1942, with a red line indicating the actual observed value of visitors for the national park - Zion. Notice that the difference between the observed and simulated is around 70,000 people.
+
+# Results:
+
+This data challenge asked us to first examine the number of visitors from the early 1900 to approximately 2015 for the national parks: Joshua Tree, Crater Lake, and Zion. From Figures 1, we notice that there is a trend of increasing number of visitors over the years. However, there is a noticeable decrease in visitors between 1935 and 1955 for two national parks, Crater Lake and Zion, but less so Joshua Tree. This dip can possibly be due to the fewer people living in those states for those particular years, but the normalized trend in Figure 2 still shows a decrease in visitors from 1935 and 1955. Finally, Figure 3 shows expands on the visitor trend between 1935 and 1955 to see which years specifically the decrease in visitation occurred. In this assignment, we conduct a simulation of park visitors for all three parks to see how much the observed value of visitors differs from a distribution of visitors assuming the probability of visitors in both years is the same. The simulations show that all observed  values are less than the simulated distribution of visitors in 1942. However, the difference is the largest for Joshua Tree, which easy to see from the graphs in Figure 1 to 3 because the dip is not as large as the other national parks. And for both Crater Lake and Zion, the difference of the observed value from the simulated distribution is approximately 75,000 visitors for both.
