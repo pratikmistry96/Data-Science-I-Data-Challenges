@@ -1,5 +1,4 @@
-# Weill Cornell Medicine - Data Science I
-## Data Challenges
+# Weill Cornell Medicine - Data Science I - Data Challenges
 ## Author: Pratik Mistry
 ## Semester: Fall 2020
 
